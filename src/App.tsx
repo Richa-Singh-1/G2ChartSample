@@ -1,530 +1,515 @@
-/* eslint-disable */
-/* @ts-ignore*/
-import React, { useEffect, useRef, useState } from 'react';
-import { IonPage, IonContent, IonApp, IonButton, IonRouterOutlet, IonSplitPane, IonToolbar, IonHeader, IonTitle } from '@ionic/react';
-import './App.css';
+/*eslint-disable*/
+import { IonApp, IonButton, IonContent, IonPage } from '@ionic/react';
+import React, { useEffect } from 'react';
+// import { PdfViewer } from 'capacitor-pdf-viewer-plugin';
+//13.6
+import { Plugins,FilesystemDirectory, Filesystem } from '@capacitor/core';
+
+// import FileSaver from 'file-saver';
+//import { PreviewAnyFile } from '@ionic-native/preview-any-file/ngx';
+// import { FileOpener } from '@ionic-native/file-opener/ngx';
+//import { FilesystemPluginWeb } from '@capacitor/core/dist/esm/web/filesystem.js';
+
+// You must import the module directly, rather than using 'Plugins.BlobWriter'.
+import { writeFile } from "capacitor-blob-writer";
+import { Http } from '@capacitor-community/http';
+import {File} from "@ionic-native/file";
+import {FileOpener} from "@ionic-native/file-opener";
+
+//const base64 = 'data:application/pdf;base64,JVBERi0xLjMNCiXi48/TDQoNCjEgMCBvYmoNCjw8DQovVHlwZSAvQ2F0YWxvZw0KL091dGxpbmVzIDIgMCBSDQovUGFnZXMgMyAwIFINCj4+DQplbmRvYmoNCg0KMiAwIG9iag0KPDwNCi9UeXBlIC9PdXRsaW5lcw0KL0NvdW50IDANCj4+DQplbmRvYmoNCg0KMyAwIG9iag0KPDwNCi9UeXBlIC9QYWdlcw0KL0NvdW50IDINCi9LaWRzIFsgNCAwIFIgNiAwIFIgXSANCj4+DQplbmRvYmoNCg0KNCAwIG9iag0KPDwNCi9UeXBlIC9QYWdlDQovUGFyZW50IDMgMCBSDQovUmVzb3VyY2VzIDw8DQovRm9udCA8PA0KL0YxIDkgMCBSIA0KPj4NCi9Qcm9jU2V0IDggMCBSDQo+Pg0KL01lZGlhQm94IFswIDAgNjEyLjAwMDAgNzkyLjAwMDBdDQovQ29udGVudHMgNSAwIFINCj4+DQplbmRvYmoNCg0KNSAwIG9iag0KPDwgL0xlbmd0aCAxMDc0ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBBIFNpbXBsZSBQREYgRmlsZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIFRoaXMgaXMgYSBzbWFsbCBkZW1vbnN0cmF0aW9uIC5wZGYgZmlsZSAtICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjY0LjcwNDAgVGQNCigganVzdCBmb3IgdXNlIGluIHRoZSBWaXJ0dWFsIE1lY2hhbmljcyB0dXRvcmlhbHMuIE1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NTIuNzUyMCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDYyOC44NDgwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjE2Ljg5NjAgVGQNCiggdGV4dC4gQW5kIG1vcmUgdGV4dC4gQm9yaW5nLCB6enp6ei4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjA0Ljk0NDAgVGQNCiggbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDU5Mi45OTIwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNTY5LjA4ODAgVGQNCiggQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA1NTcuMTM2MCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBFdmVuIG1vcmUuIENvbnRpbnVlZCBvbiBwYWdlIDIgLi4uKSBUag0KRVQNCmVuZHN0cmVhbQ0KZW5kb2JqDQoNCjYgMCBvYmoNCjw8DQovVHlwZSAvUGFnZQ0KL1BhcmVudCAzIDAgUg0KL1Jlc291cmNlcyA8PA0KL0ZvbnQgPDwNCi9GMSA5IDAgUiANCj4+DQovUHJvY1NldCA4IDAgUg0KPj4NCi9NZWRpYUJveCBbMCAwIDYxMi4wMDAwIDc5Mi4wMDAwXQ0KL0NvbnRlbnRzIDcgMCBSDQo+Pg0KZW5kb2JqDQoNCjcgMCBvYmoNCjw8IC9MZW5ndGggNjc2ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBTaW1wbGUgUERGIEZpbGUgMiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIC4uLmNvbnRpbnVlZCBmcm9tIHBhZ2UgMS4gWWV0IG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NzYuNjU2MCBUZA0KKCBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY2NC43MDQwIFRkDQooIHRleHQuIE9oLCBob3cgYm9yaW5nIHR5cGluZyB0aGlzIHN0dWZmLiBCdXQgbm90IGFzIGJvcmluZyBhcyB3YXRjaGluZyApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY1Mi43NTIwIFRkDQooIHBhaW50IGRyeS4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NDAuODAwMCBUZA0KKCBCb3JpbmcuICBNb3JlLCBhIGxpdHRsZSBtb3JlIHRleHQuIFRoZSBlbmQsIGFuZCBqdXN0IGFzIHdlbGwuICkgVGoNCkVUDQplbmRzdHJlYW0NCmVuZG9iag0KDQo4IDAgb2JqDQpbL1BERiAvVGV4dF0NCmVuZG9iag0KDQo5IDAgb2JqDQo8PA0KL1R5cGUgL0ZvbnQNCi9TdWJ0eXBlIC9UeXBlMQ0KL05hbWUgL0YxDQovQmFzZUZvbnQgL0hlbHZldGljYQ0KL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcNCj4+DQplbmRvYmoNCg0KMTAgMCBvYmoNCjw8DQovQ3JlYXRvciAoUmF2ZSBcKGh0dHA6Ly93d3cubmV2cm9uYS5jb20vcmF2ZVwpKQ0KL1Byb2R1Y2VyIChOZXZyb25hIERlc2lnbnMpDQovQ3JlYXRpb25EYXRlIChEOjIwMDYwMzAxMDcyODI2KQ0KPj4NCmVuZG9iag0KDQp4cmVmDQowIDExDQowMDAwMDAwMDAwIDY1NTM1IGYNCjAwMDAwMDAwMTkgMDAwMDAgbg0KMDAwMDAwMDA5MyAwMDAwMCBuDQowMDAwMDAwMTQ3IDAwMDAwIG4NCjAwMDAwMDAyMjIgMDAwMDAgbg0KMDAwMDAwMDM5MCAwMDAwMCBuDQowMDAwMDAxNTIyIDAwMDAwIG4NCjAwMDAwMDE2OTAgMDAwMDAgbg0KMDAwMDAwMjQyMyAwMDAwMCBuDQowMDAwMDAyNDU2IDAwMDAwIG4NCjAwMDAwMDI1NzQgMDAwMDAgbg0KDQp0cmFpbGVyDQo8PA0KL1NpemUgMTENCi9Sb290IDEgMCBSDQovSW5mbyAxMCAwIFINCj4+DQoNCnN0YXJ0eHJlZg0KMjcxNA0KJSVFT0YNCg=='
+//const base64 ='JVBERi0xLjMNCiXi48/TDQoNCjEgMCBvYmoNCjw8DQovVHlwZSAvQ2F0YWxvZw0KL091dGxpbmVzIDIgMCBSDQovUGFnZXMgMyAwIFINCj4+DQplbmRvYmoNCg0KMiAwIG9iag0KPDwNCi9UeXBlIC9PdXRsaW5lcw0KL0NvdW50IDANCj4+DQplbmRvYmoNCg0KMyAwIG9iag0KPDwNCi9UeXBlIC9QYWdlcw0KL0NvdW50IDINCi9LaWRzIFsgNCAwIFIgNiAwIFIgXSANCj4+DQplbmRvYmoNCg0KNCAwIG9iag0KPDwNCi9UeXBlIC9QYWdlDQovUGFyZW50IDMgMCBSDQovUmVzb3VyY2VzIDw8DQovRm9udCA8PA0KL0YxIDkgMCBSIA0KPj4NCi9Qcm9jU2V0IDggMCBSDQo+Pg0KL01lZGlhQm94IFswIDAgNjEyLjAwMDAgNzkyLjAwMDBdDQovQ29udGVudHMgNSAwIFINCj4+DQplbmRvYmoNCg0KNSAwIG9iag0KPDwgL0xlbmd0aCAxMDc0ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBBIFNpbXBsZSBQREYgRmlsZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIFRoaXMgaXMgYSBzbWFsbCBkZW1vbnN0cmF0aW9uIC5wZGYgZmlsZSAtICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjY0LjcwNDAgVGQNCigganVzdCBmb3IgdXNlIGluIHRoZSBWaXJ0dWFsIE1lY2hhbmljcyB0dXRvcmlhbHMuIE1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NTIuNzUyMCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDYyOC44NDgwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjE2Ljg5NjAgVGQNCiggdGV4dC4gQW5kIG1vcmUgdGV4dC4gQm9yaW5nLCB6enp6ei4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNjA0Ljk0NDAgVGQNCiggbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDU5Mi45OTIwIFRkDQooIEFuZCBtb3JlIHRleHQuIEFuZCBtb3JlIHRleHQuICkgVGoNCkVUDQpCVA0KL0YxIDAwMTAgVGYNCjY5LjI1MDAgNTY5LjA4ODAgVGQNCiggQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA1NTcuMTM2MCBUZA0KKCB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBFdmVuIG1vcmUuIENvbnRpbnVlZCBvbiBwYWdlIDIgLi4uKSBUag0KRVQNCmVuZHN0cmVhbQ0KZW5kb2JqDQoNCjYgMCBvYmoNCjw8DQovVHlwZSAvUGFnZQ0KL1BhcmVudCAzIDAgUg0KL1Jlc291cmNlcyA8PA0KL0ZvbnQgPDwNCi9GMSA5IDAgUiANCj4+DQovUHJvY1NldCA4IDAgUg0KPj4NCi9NZWRpYUJveCBbMCAwIDYxMi4wMDAwIDc5Mi4wMDAwXQ0KL0NvbnRlbnRzIDcgMCBSDQo+Pg0KZW5kb2JqDQoNCjcgMCBvYmoNCjw8IC9MZW5ndGggNjc2ID4+DQpzdHJlYW0NCjIgSg0KQlQNCjAgMCAwIHJnDQovRjEgMDAyNyBUZg0KNTcuMzc1MCA3MjIuMjgwMCBUZA0KKCBTaW1wbGUgUERGIEZpbGUgMiApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY4OC42MDgwIFRkDQooIC4uLmNvbnRpbnVlZCBmcm9tIHBhZ2UgMS4gWWV0IG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NzYuNjU2MCBUZA0KKCBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSB0ZXh0LiBBbmQgbW9yZSApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY2NC43MDQwIFRkDQooIHRleHQuIE9oLCBob3cgYm9yaW5nIHR5cGluZyB0aGlzIHN0dWZmLiBCdXQgbm90IGFzIGJvcmluZyBhcyB3YXRjaGluZyApIFRqDQpFVA0KQlQNCi9GMSAwMDEwIFRmDQo2OS4yNTAwIDY1Mi43NTIwIFRkDQooIHBhaW50IGRyeS4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gQW5kIG1vcmUgdGV4dC4gKSBUag0KRVQNCkJUDQovRjEgMDAxMCBUZg0KNjkuMjUwMCA2NDAuODAwMCBUZA0KKCBCb3JpbmcuICBNb3JlLCBhIGxpdHRsZSBtb3JlIHRleHQuIFRoZSBlbmQsIGFuZCBqdXN0IGFzIHdlbGwuICkgVGoNCkVUDQplbmRzdHJlYW0NCmVuZG9iag0KDQo4IDAgb2JqDQpbL1BERiAvVGV4dF0NCmVuZG9iag0KDQo5IDAgb2JqDQo8PA0KL1R5cGUgL0ZvbnQNCi9TdWJ0eXBlIC9UeXBlMQ0KL05hbWUgL0YxDQovQmFzZUZvbnQgL0hlbHZldGljYQ0KL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcNCj4+DQplbmRvYmoNCg0KMTAgMCBvYmoNCjw8DQovQ3JlYXRvciAoUmF2ZSBcKGh0dHA6Ly93d3cubmV2cm9uYS5jb20vcmF2ZVwpKQ0KL1Byb2R1Y2VyIChOZXZyb25hIERlc2lnbnMpDQovQ3JlYXRpb25EYXRlIChEOjIwMDYwMzAxMDcyODI2KQ0KPj4NCmVuZG9iag0KDQp4cmVmDQowIDExDQowMDAwMDAwMDAwIDY1NTM1IGYNCjAwMDAwMDAwMTkgMDAwMDAgbg0KMDAwMDAwMDA5MyAwMDAwMCBuDQowMDAwMDAwMTQ3IDAwMDAwIG4NCjAwMDAwMDAyMjIgMDAwMDAgbg0KMDAwMDAwMDM5MCAwMDAwMCBuDQowMDAwMDAxNTIyIDAwMDAwIG4NCjAwMDAwMDE2OTAgMDAwMDAgbg0KMDAwMDAwMjQyMyAwMDAwMCBuDQowMDAwMDAyNDU2IDAwMDAwIG4NCjAwMDAwMDI1NzQgMDAwMDAgbg0KDQp0cmFpbGVyDQo8PA0KL1NpemUgMTENCi9Sb290IDEgMCBSDQovSW5mbyAxMCAwIFINCj4+DQoNCnN0YXJ0eHJlZg0KMjcxNA0KJSVFT0YNCg=='
+import {BASE64} from './file';
 // const { Filesystem } = Plugins;
+//const Filesystem = new FilesystemPluginWeb();
+const App: React.FC = () => {
 
-/* Core CSS required for Ionic components to work properly */
-import '@ionic/react/css/core.css';
+  const { Browser } = Plugins;
+  //let blob ;
 
-/* Basic CSS for apps built with Ionic */
-import '@ionic/react/css/normalize.css';
-import '@ionic/react/css/structure.css';
-import '@ionic/react/css/typography.css';
+  // const downloadPdf =(pdfBase64: string) =>{
+  //   const { Filesystem } = Plugins;
 
-/* Optional CSS utils that can be commented out */
-import '@ionic/react/css/padding.css';
-import '@ionic/react/css/float-elements.css';
-import '@ionic/react/css/text-alignment.css';
-import '@ionic/react/css/text-transformation.css';
-import '@ionic/react/css/flex-utils.css';
-import '@ionic/react/css/display.css';
+  //   if (this.plt.is('cordova')) {
+  //       // Save the PDF to the device
+  //       const fileName = 'timesheet.pdf';
+  //       try {
+  //         Filesystem.writeFile({
+  //           path: fileName,
+  //           data: pdfBase64,
+  //           directory: FilesystemDirectory.Documents
+  //           // encoding: FilesystemEncoding.UTF8
+  //         }).then((writeFileResult) => {
+  //           Filesystem.getUri({
+  //               directory: FilesystemDirectory.Documents,
+  //               path: fileName
+  //           }).then((getUriResult) => {
+  //               const path = getUriResult.uri;
+  //               this.fileOpener.open(path, 'application/pdf')
+  //               .then(() => console.log('File is opened'))
+  //               .catch(error => console.log('Error openening file', error));
+  //           }, (error) => {
+  //               console.log(error);
+  //           });
+  //         });
+  //       } catch (error) {
+  //         console.error('Unable to write file', error);
+  //       }
+  //     } else {
+  //     // On a browser simply use download
+  //     this.pdfObj.download();
+  //   }
+  // }
+  const b64toBlob = (b64Data, contentType = '', sliceSize = 512) => {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
 
-/* Theme variables */
-import './theme/variables.css';
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
 
-import { Plugins } from '@capacitor/core';
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
 
-const { Browser } = Plugins;
-//import F2 from '@antv/f2';
-import { Chart } from '@antv/g2';
-// const lineData = [
-//   {
-//     "Data": "2010-01",
-//     "sales": 1998
-//   },
-//   {
-//     "Data": "2010-02",
-//     "sales": 1850
-//   },
-//   {
-//     "Data": "2010-03",
-//     "sales": 1720
-//   },
-//   {
-//     "Data": "2010-04",
-//     "sales": 1818
-//   },
-//   {
-//     "Data": "2010-05",
-//     "sales": 1920
-//   },
-//   {
-//     "Data": "2010-06",
-//     "sales": 1802
-//   },
-//   {
-//     "Data": "2010-07",
-//     "sales": 1945
-//   },
-//   {
-//     "Data": "2010-08",
-//     "sales": 1856
-//   },
-//   {
-//     "Data": "2010-09",
-//     "sales": 2107
-//   },
-//   {
-//     "Data": "2010-10",
-//     "sales": 2140
-//   },
-//   {
-//     "Data": "2010-11",
-//     "sales": 2311
-//   },
-//   {
-//     "Data": "2010-12",
-//     "sales": 1972
-//   },
-//   {
-//     "Data": "2011-01",
-//     "sales": 1760
-//   },
-//   {
-//     "Data": "2011-02",
-//     "sales": 1824
-//   },
-//   {
-//     "Data": "2011-03",
-//     "sales": 1801
-//   },
-//   {
-//     "Data": "2011-04",
-//     "sales": 2001
-//   },
-//   {
-//     "Data": "2011-05",
-//     "sales": 1640
-//   },
-//   {
-//     "Data": "2011-06",
-//     "sales": 1502
-//   },
-//   {
-//     "Data": "2011-07",
-//     "sales": 1621
-//   },
-//   {
-//     "Data": "2011-08",
-//     "sales": 1480
-//   },
-//   {
-//     "Data": "2011-09",
-//     "sales": 1549
-//   },
-//   {
-//     "Data": "2011-10",
-//     "sales": 1390
-//   },
-//   {
-//     "Data": "2011-11",
-//     "sales": 1325
-//   },
-//   {
-//     "Data": "2011-12",
-//     "sales": 1250
-//   },
-//   {
-//     "Data": "2012-01",
-//     "sales": 1394
-//   },
-//   {
-//     "Data": "2012-02",
-//     "sales": 1406
-//   },
-//   {
-//     "Data": "2012-03",
-//     "sales": 1578
-//   },
-//   {
-//     "Data": "2012-04",
-//     "sales": 1465
-//   },
-//   {
-//     "Data": "2012-05",
-//     "sales": 1689
-//   },
-//   {
-//     "Data": "2012-06",
-//     "sales": 1755
-//   },
-//   {
-//     "Data": "2012-07",
-//     "sales": 1495
-//   },
-//   {
-//     "Data": "2012-08",
-//     "sales": 1508
-//   },
-//   {
-//     "Data": "2012-09",
-//     "sales": 1433
-//   },
-//   {
-//     "Data": "2012-10",
-//     "sales": 1344
-//   },
-//   {
-//     "Data": "2012-11",
-//     "sales": 1201
-//   },
-//   {
-//     "Data": "2012-12",
-//     "sales": 1065
-//   },
-//   {
-//     "Data": "2013-01",
-//     "sales": 1255
-//   },
-//   {
-//     "Data": "2013-02",
-//     "sales": 1429
-//   },
-//   {
-//     "Data": "2013-03",
-//     "sales": 1398
-//   },
-//   {
-//     "Data": "2013-04",
-//     "sales": 1678
-//   },
-//   {
-//     "Data": "2013-05",
-//     "sales": 1524
-//   },
-//   {
-//     "Data": "2013-06",
-//     "sales": 1688
-//   },
-//   {
-//     "Data": "2013-07",
-//     "sales": 1500
-//   },
-//   {
-//     "Data": "2013-08",
-//     "sales": 1670
-//   },
-//   {
-//     "Data": "2013-09",
-//     "sales": 1734
-//   },
-//   {
-//     "Data": "2013-10",
-//     "sales": 1699
-//   },
-//   {
-//     "Data": "2013-11",
-//     "sales": 1508
-//   },
-//   {
-//     "Data": "2013-12",
-//     "sales": 1680
-//   },
-//   {
-//     "Data": "2014-01",
-//     "sales": 1750
-//   },
-//   {
-//     "Data": "2014-02",
-//     "sales": 1602
-//   },
-//   {
-//     "Data": "2014-03",
-//     "sales": 1834
-//   },
-//   {
-//     "Data": "2014-04",
-//     "sales": 1722
-//   },
-//   {
-//     "Data": "2014-05",
-//     "sales": 1430
-//   },
-//   {
-//     "Data": "2014-06",
-//     "sales": 1280
-//   },
-//   {
-//     "Data": "2014-07",
-//     "sales": 1367
-//   },
-//   {
-//     "Data": "2014-08",
-//     "sales": 1155
-//   },
-//   {
-//     "Data": "2014-09",
-//     "sales": 1289
-//   },
-//   {
-//     "Data": "2014-10",
-//     "sales": 1104
-//   },
-//   {
-//     "Data": "2014-11",
-//     "sales": 1246
-//   },
-//   {
-//     "Data": "2014-12",
-//     "sales": 1098
-//   },
-//   {
-//     "Data": "2015-01",
-//     "sales": 1189
-//   },
-//   {
-//     "Data": "2015-02",
-//     "sales": 1276
-//   },
-//   {
-//     "Data": "2015-03",
-//     "sales": 1033
-//   },
-//   {
-//     "Data": "2015-04",
-//     "sales": 956
-//   },
-//   {
-//     "Data": "2015-05",
-//     "sales": 845
-//   },
-//   {
-//     "Data": "2015-06",
-//     "sales": 1089
-//   },
-//   {
-//     "Data": "2015-07",
-//     "sales": 944
-//   },
-//   {
-//     "Data": "2015-08",
-//     "sales": 1043
-//   },
-//   {
-//     "Data": "2015-09",
-//     "sales": 893
-//   },
-//   {
-//     "Data": "2015-10",
-//     "sales": 840
-//   },
-//   {
-//     "Data": "2015-11",
-//     "sales": 934
-//   },
-//   {
-//     "Data": "2015-12",
-//     "sales": 810
-//   },
-//   {
-//     "Data": "2016-01",
-//     "sales": 782
-//   },
-//   {
-//     "Data": "2016-02",
-//     "sales": 1089
-//   },
-//   {
-//     "Data": "2016-03",
-//     "sales": 745
-//   },
-//   {
-//     "Data": "2016-04",
-//     "sales": 680
-//   },
-//   {
-//     "Data": "2016-05",
-//     "sales": 802
-//   },
-//   {
-//     "Data": "2016-06",
-//     "sales": 697
-//   },
-//   {
-//     "Data": "2016-07",
-//     "sales": 583
-//   },
-//   {
-//     "Data": "2016-08",
-//     "sales": 456
-//   },
-//   {
-//     "Data": "2016-09",
-//     "sales": 524
-//   },
-//   {
-//     "Data": "2016-10",
-//     "sales": 398
-//   },
-//   {
-//     "Data": "2016-11",
-//     "sales": 278
-//   },
-//   {
-//     "Data": "2016-12",
-//     "sales": 195
-//   },
-//   {
-//     "Data": "2017-01",
-//     "sales": 145
-//   },
-//   {
-//     "Data": "2017-02",
-//     "sales": 207
-//   }
-// ];
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, { type: contentType });
+    return blob;
+  }
 
 
+  const dataURItoBlob = (dataURI) => {
+    const byteString = atob(dataURI);
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const int8Array = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < byteString.length; i++) {
+      int8Array[i] = byteString.charCodeAt(i);
+    }
+    const blob = new Blob([int8Array], { type: 'application/pdf' });
+    return blob;
+  }
 
+  // const showFromUrl = () => {
+  //   const url = "http://www.africau.edu/images/default/sample.pdf";
+  //   const { PdfViewer } = Plugins;
+  //   PdfViewer.show({ url: url })
+  //     .then(res => {
+  //       console.log(res);
+  //     })
+  //     .catch(err => {
+  //       console.error(err);
+  //     });
+  // }
 
+  // const pickAndShow = () => {
+  //   const { PdfViewer } = Plugins;
+  //   PdfViewer.pickAndShow()
+  //     .then(res => {
+  //       console.log(res);
+  //     })
+  //     .catch(err => {
+  //       console.error(err);
+  //     });
+  // }
 
-const App = () => {
+  // const writeSecretFile = async () => {
+  //   await Filesystem.writeFile({
+  //     path: 'secrets/text.txt',
+  //     data: "This is a test",
+  //     directory: Directory.Documents,
+  //     encoding: Encoding.UTF8,
+  //   });
+  // };
 
-  useEffect(() => {
-    const lineData = [
-      { year: '1991', value: 3 },
-      { year: '1992', value: 4 },
-      { year: '1993', value: 3.5 },
-      { year: '1994', value: 5 },
-      { year: '1995', value: 4.9 },
-      { year: '1996', value: 6 },
-      { year: '1997', value: 7 },
-      { year: '1998', value: 9 },
-      { year: '1999', value: 13 },
-    ];
+  const richa = (blob) =>{
+    return new Promise((resolve,reject)=>{
+      const reader =new FileReader;
+      reader.onerror=reject;
+      reader.onload = () =>{
+        resolve(reader.result);
+      };
+      reader.readAsDataURL(blob);
+    })
+  }
 
-        const chart = new Chart({
-          container: 'container',
-          autoFit: true,
-          height: 300,
-        });
-        chart.data(lineData);
-        chart.scale('year', {
-          range: [0, 1],
-          tickCount: 10,
-          type: 'timeCat'
-        });
-        chart.scale('value', {
-          nice: true,
-        });
-        chart.axis('value', {
-          label: {
-            formatter: text => {
-              return text.replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
-            }
-          }
-        });
-        chart.tooltip({
-          showCrosshairs: true,
-        });
+  const downloadFile = async () => {
+    console.log('downloadFile');
+    try {
+      const options = {
+        url: 'http://localhost:8090/',
+        // Optional
+        method: 'GET',
+        // filePath: 'stupid.pdf',
+        // fileDirectory: FilesystemDirectory.Cache,
+      };
 
-        chart.annotation().dataMarker({
-          position: ['2014-01', 1750],
-          top: true,
-          text: {
-            content: 'RICHAAAAAS',
-            style: {
-              fontSize: 13,
-            }
-          },
-          line: {
-            length: 30,
-          },
-        });
+      // Writes to local filesystem
+    //   const response = await Http.request(options);
+    // // //   //const blobURL = URL.createObjectURL(response);
+    // // //   // const res = response.data;
+      
+    //   const blob = new Blob([response.data], { type: "application/pdf" });
+      
+    //   let base64 = await richa(blob);
+    //   console.log('response',blob,base64);
+      
 
-        chart.line().position('year*value');
-        chart.area().position('year*value');
-        chart.render();
-         
+      // const {uri} =await Filesystem.writeFile({
+      //   data: response.data,
+      //   path: "richa_richa.pdf",
+      //   directory: FilesystemDirectory.Documents,
+      // });
+      // console.log('uri','file:/'+uri);
+      // const uri = await Filesystem.getUri({
+      //   directory:FilesystemDirectory.Data,
+      //   path: "richa_richa.pdf",
+      
+      // });
+      // const path = Capacitor.convertFileSrc(uri.uri);
+      //console.log('path',uri);
+    //      const {uri} = await Filesystem.writeFile({
+    //   path: "media/pdf/res.pdf",
+    //   data: blob,
+    //   directory: FilesystemDirectory.Documents,
+    //   //encoding: FilesystemEncoding.UTF8,
+    // });
+    //     window['PreviewAnyFile'].previewPath(
+    //     win =>
+    //         {
+    //             if (win == "SUCCESS") {
+    //                 console.log('success')
+    //             } else if (win == "CLOSING") {
+    //                 console.log('closing');
+    //                 //base64 =null;
+    //             } else if (win == "NO_APP") {
+    //                 console.log('no suitable app to open the file (mainly will appear on android')
+    //             } else {
+    //                 console.log('error')
+    //             }
+    //         },
+    //     error => {
+    //       console.error("open failed", error);
+    //       // base64=null;
+      
+    //   },
+    //   'file:/'+uri,
+    // );
+   
+    } catch (e) {
+      console.error(e);
+    }
 
-      const data = [
-        { item: 'A', count: 40, percent: 0.4 },
-        { item: 'B', count: 21, percent: 0.21 },
-        { item: 'C', count: 17, percent: 0.17 },
-        { item: 'D', count: 13, percent: 0.13 },
-        { item: 'E', count: 9, percent: 0.09 },
-      ];
-      const chartB = new Chart({
-        container: 'containerB',
-        autoFit: true,
-        height: 500,
-        // events:['click'],
-      });
-      chartB.data(data);
-      chartB.scale('percent', {
-        formatter: (val) => {
-          val = val * 100 + '%';
-          return val;
-        },
-      });
-      chartB.coordinate('theta', {
-        radius: 0.75,
-        innerRadius: 0.6,
-      });
-      chartB.tooltip({
-        showTitle: false,
-        showMarkers: false,
-        itemTpl: '<li class="g2-tooltip-list-item"><span style="background-color:{color};" class="g2-tooltip-marker"></span>{name}: {value}</li>',
-      });
-      chartB.legend({
-        // triggerOn:[]
-      })
-      // 辅助文本
-      chartB
-        .annotation()
-        .text({
-          position: ['50%', '50%'],
-          content: '200',
-          style: {
-            fontSize: 20,
-            fill: '#8c8c8c',
-            textAlign: 'center',
-          },
-          offsetX: -10,
-          offsetY: 20,
-        })
-      chartB
-        .interval()
-        .adjust('stack')
-        .position('percent')
-        .color('item')
-        .label('percent', (percent) => {
-          return {
-            content: (data) => {
-              return `${data.item}: ${percent * 100}%`;
+    
+
+    // Then read the file
+    // if (response.path) {
+    //   const read = await Filesystem.readFile({
+    //     path: 'download.pdf',
+    //     directory: FilesystemDirectory.Data,
+    //   });
+    // }
+  };
+
+  const downloadVideo = async () => {
+    //downloadFile();
+    // Firstly, obtain a Blob.
+    const byteArray =[37, 80, 68, 70, 45, 49, 46, 49, 10, 37, -62, -91, -62, -79, -61,
+      -85, 10, 10, 49, 32, 48, 32, 111, 98, 106, 10, 32, 32, 60, 60, 32, 47, 84, 121, 112, 101, 32, 47, 67, 97, 116,
+      97, 108, 111, 103, 10, 32, 32, 32, 32, 32, 47, 80, 97, 103, 101, 115, 32, 50, 32, 48, 32, 82, 10, 32, 32, 62,
+      62, 10, 101, 110, 100, 111, 98, 106, 10, 10, 50, 32, 48, 32, 111, 98, 106, 10, 32, 32, 60, 60, 32, 47, 84, 121,
+      112, 101, 32, 47, 80, 97, 103, 101, 115, 10, 32, 32, 32, 32, 32, 47, 75, 105, 100, 115, 32, 91, 51, 32, 48, 32,
+      82, 93, 10, 32, 32, 32, 32, 32, 47, 67, 111, 117, 110, 116, 32, 49, 10, 32, 32, 32, 32, 32, 47, 77, 101, 100,
+      105, 97, 66, 111, 120, 32, 91, 48, 32, 48, 32, 51, 48, 48, 32, 49, 52, 52, 93, 10, 32, 32, 62, 62, 10, 101,
+      110, 100, 111, 98, 106, 10, 10, 51, 32, 48, 32, 111, 98, 106, 10, 32, 32, 60, 60, 32, 32, 47, 84, 121, 112,
+      101, 32, 47, 80, 97, 103, 101, 10, 32, 32, 32, 32, 32, 32, 47, 80, 97, 114, 101, 110, 116, 32, 50, 32, 48, 32,
+      82, 10, 32, 32, 32, 32, 32, 32, 47, 82, 101, 115, 111, 117, 114, 99, 101, 115, 10, 32, 32, 32, 32, 32, 32, 32,
+      60, 60, 32, 47, 70, 111, 110, 116, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 60, 60, 32, 47, 70, 49, 10,
+      32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 60, 60, 32, 47, 84, 121, 112, 101, 32, 47, 70, 111,
+      110, 116, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 83, 117, 98, 116,
+      121, 112, 101, 32, 47, 84, 121, 112, 101, 49, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+      32, 32, 32, 47, 66, 97, 115, 101, 70, 111, 110, 116, 32, 47, 84, 105, 109, 101, 115, 45, 82, 111, 109, 97, 110,
+      10, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 62, 62, 10, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+      32, 32, 62, 62, 10, 32, 32, 32, 32, 32, 32, 32, 62, 62, 10, 32, 32, 32, 32, 32, 32, 47, 67, 111, 110, 116, 101,
+      110, 116, 115, 32, 52, 32, 48, 32, 82, 10, 32, 32, 62, 62, 10, 101, 110, 100, 111, 98, 106, 10, 10, 52, 32, 48,
+      32, 111, 98, 106, 10, 32, 32, 60, 60, 32, 47, 76, 101, 110, 103, 116, 104, 32, 53, 53, 32, 62, 62, 10, 115,
+      116, 114, 101, 97, 109, 10, 32, 32, 66, 84, 10, 32, 32, 32, 32, 47, 70, 49, 32, 49, 56, 32, 84, 102, 10, 32,
+      32, 32, 32, 48, 32, 48, 32, 84, 100, 10, 32, 32, 32, 32, 40, 72, 101, 108, 108, 111, 32, 87, 111, 114, 108,
+      100, 41, 32, 84, 106, 10, 32, 32, 69, 84, 10, 101, 110, 100, 115, 116, 114, 101, 97, 109, 10, 101, 110, 100,
+      111, 98, 106, 10, 10, 120, 114, 101, 102, 10, 48, 32, 53, 10, 48, 48, 48, 48, 48, 48, 48, 48, 48, 48, 32, 54,
+      53, 53, 51, 53, 32, 102, 32, 10, 48, 48, 48, 48, 48, 48, 48, 48, 49, 56, 32, 48, 48, 48, 48, 48, 32, 110, 32,
+      10, 48, 48, 48, 48, 48, 48, 48, 48, 55, 55, 32, 48, 48, 48, 48, 48, 32, 110, 32, 10, 48, 48, 48, 48, 48, 48,
+      48, 49, 55, 56, 32, 48, 48, 48, 48, 48, 32, 110, 32, 10, 48, 48, 48, 48, 48, 48, 48, 52, 53, 55, 32, 48, 48,
+      48, 48, 48, 32, 110, 32, 10, 116, 114, 97, 105, 108, 101, 114, 10, 32, 32, 60, 60, 32, 32, 47, 82, 111, 111,
+      116, 32, 49, 32, 48, 32, 82, 10, 32, 32, 32, 32, 32, 32, 47, 83, 105, 122, 101, 32, 53, 10, 32, 32, 62, 62, 10,
+      115, 116, 97, 114, 116, 120, 114, 101, 102, 10, 53, 54, 53, 10, 37, 37, 69, 79, 70, 10 ];
+    try{
+      const blobFromByteArray = new Blob([new Uint8Array(byteArray)], { type: 'application/pdf' });
+      const objectURL = URL.createObjectURL(blobFromByteArray);
+      console.log('blobFromByteArray objectURL',blobFromByteArray,objectURL);
+      //downloadFile();
+    // const res = await fetch("http://localhost:8090/");
+    // //const blob = await res.blob();
+    //   const options = {
+    //     url: 'http://localhost:8090/',
+    //     // Optional
+    //     method: 'GET',
+    //   };
+
+    // //   // Writes to local filesystem
+    // const response = await Http.request(options);
+    //console.log('File written to ',File.dataDirectory+'pleasepleasework.pdf');
+    //console.log('Response data',response.data);
+    const downloadFile = async () => {
+      console.log("CALLLIIIINGGG")
+      const options = {
+        url:'http://localhost:8090/',
+        filePath: 'document.pdf',
+        fileDirectory: FilesystemDirectory.Documents,
+        // Optional
+        method: 'GET',
+      };
+      
+      const response = await Http.downloadFile(options);
+      window['PreviewAnyFile'].previewPath(
+        win =>
+            {
+                if (win == "SUCCESS") {
+                    console.log('success')
+                } else if (win == "CLOSING") {
+                    console.log('closing')
+                } else if (win == "NO_APP") {
+                    console.log('no suitable app to open the file (mainly will appear on android')
+                } else {
+                    console.log('error')
+                }
             },
-          };
-        })
-        .tooltip('item*percent', (item, percent) => {
-          percent = percent * 100 + '%';
-          return {
-            name: item,
-            value: percent,
-          };
-        });
-      
-      chartB.interaction('element-active');
-      
-      chartB.render();
-  }, []);
+        error => console.error("open failed", error),
+        FilesystemDirectory.Documents+'document.pdf',
+  );
+      console.log('FilesystemDirectory.Documents',response,FilesystemDirectory.Documents);
 
+  // Then read the file
+  //   if (response.path) {
+  //   const read = await Filesystem.readFile({
+  //     path: 'download.pdf',
+  //     directory: FilesystemDirectory.Documents,
+  //   });
+  // }
+    };
+    
+    //downloadFile();
+    
+    const filepath = await  File.writeFile(
+      File.dataDirectory,
+      'byteArray.pdf',
+      blobFromByteArray,
+      //new Blob([response.data]),
+      {
+        replace: true,
+      }
+    );
+    console.log('filepath',filepath);
+    window['PreviewAnyFile'].previewPath(
+          win =>
+              {
+                  if (win == "SUCCESS") {
+                      console.log('success')
+                  } else if (win == "CLOSING") {
+                      console.log('closing')
+                  } else if (win == "NO_APP") {
+                      console.log('no suitable app to open the file (mainly will appear on android')
+                  } else {
+                      console.log('error')
+                  }
+              },
+          error => console.error("open failed", error),
+          File.dataDirectory+'byteArray.pdf',
+    );
+    // Browser.open({url:File.dataDirectory+'/pleasepleasework.pdf'})
+    // await FileOpener.open(
+    //   File.dataDirectory+'/pleasepleasework.pdf',
+    //   "application/pdf"
+    // );
+
+    }catch(e){
+      console.error(e);
+    }
+    // await Filesystem.writeFile({
+    //   path: 'secrets/text.txt',
+    //   data: blob,
+    //   directory: Directory.Documents,
+    // });
+    // const objectURL = URL.createObjectURL(blob);
+    // console.log('blob',objectURL);
+
+    // FileSaver.saveAs("http://localhost:8090/", "richa.pdf");
+
+    //   const { uri } = await writeFile({
+    //     path: "media/pdf/sample.pdf",
+    //     directory: FilesystemDirectory.Data,
+    //     data: blob,
+    //     recursive: true,
+    //     fallback(writeError) {
+    //     console.log(writeError);
+    //     const shouldFallback = process.env.NODE_ENV === "production";
+    //     return shouldFallback;
+    //   }
+    // });
+
+    // const {uri} = await Filesystem.writeFile({
+    //   path: 'secrets/text.txt',
+    //   data: res,
+    //   directory: Directory.Documents,
+    //   encoding: Encoding.UTF8,
+    // });
+
+    //if(window && 'PreviewAnyFile' in window){
+    //   window['PreviewAnyFile'].previewPath(
+    //     win =>
+    //         {
+    //             if (win == "SUCCESS") {
+    //                 console.log('success')
+    //             } else if (win == "CLOSING") {
+    //                 console.log('closing')
+    //             } else if (win == "NO_APP") {
+    //                 console.log('no suitable app to open the file (mainly will appear on android')
+    //             } else {
+    //                 console.log('error')
+    //             }
+    //         },
+    //     error => console.error("open failed", error),
+    //     objectURL
+    // );
+    //   window['PreviewAnyFile'].previewPath(
+    //     win => console.log("open status",win),
+    //     error => console.error("open failed", error),
+    //     objectURL,{name : 'file.pdf'}
+    // );
+    //}
+
+
+
+  }
+  function downloadURI(uri, name) {
+    var link = document.createElement("a");
+    // If you don't know the name or want to use
+    // the webserver default set name = ''
+    link.setAttribute('download', name);
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
+  const handleClick = async () => {
+    //     // await Browser.open({ url: base64 });
+    //const blob = dataURItoBlob(base64);
+
+    //     // window.open(url, '_blank');
+    //     FileOutputStream fos = new FileOutputStream(filepath);
+    // fos.write(Base64.decode(base64String, Base64.NO_WRAP));
+    // fos.close();
+    // window.open("data:application/pdf;base64," + Base64.encode(out));
+    // const blob = b64toBlob(base64, 'application/pdf');
+    // const blobUrl = URL.createObjectURL(blob);
+    // console.log('blobUrl',blobUrl);
+    // let metadata = {
+    //   type: 'application/pdf'
+    // };
+    // let file = new File([blob], "sample.pdf", metadata);
+    // const url = URL.createObjectURL(file);
+    // console.log('file',file,url);
+    // window.open(url, '_blank');
+    // Browser.open({url:base64});
+    //showFromUrl();
+    //downloadURI('http://localhost:8090/','temp.pdf');
+    // console.log('Calling', PreviewAnyFile.prototype.previewBase64)
+    // PreviewAnyFile.prototype.previewBase64(
+    //   base64
+    // );
+    // const res = await fetch('http://localhost:8090/');
+    // const blob = await res.blob();
+    // console.log('res',blob);
+    //downloadVideo();
+    downloadURI('http://localhost:8090/','temp.pdf');
+
+
+
+  };
+
+  const downloadOpenusingFile = async() =>{
+      const options = {
+        url: 'http://localhost:8090/',
+        // Optional
+        method: 'GET',
+      };
+
+    // //   // Writes to local filesystem
+    const response = await Http.request(options);
+    console.log('File written to ',File.dataDirectory+'pleasepleasework.pdf');
+    console.log('Response data',response.data);
+    const filepath = await  File.writeFile(
+      File.dataDirectory,
+      'downloadedFile.pdf',
+      new Blob([response.data]),
+      {
+        replace: true,
+      }
+    );
+    console.log('filepath',filepath);
+    window['PreviewAnyFile'].previewPath(
+          win =>
+              {
+                  if (win == "SUCCESS") {
+                      console.log('success')
+                  } else if (win == "CLOSING") {
+                      console.log('closing')
+                  } else if (win == "NO_APP") {
+                      console.log('no suitable app to open the file (mainly will appear on android')
+                  } else {
+                      console.log('error')
+                  }
+              },
+          error => console.error("open failed", error),
+          File.dataDirectory+'downloadedFile.pdf',
+    );
+  }
+  const launchUsingbase64 = async() =>{
+      window['PreviewAnyFile'].previewBase64(
+        win =>
+            {
+                if (win == "SUCCESS") {
+                    console.log('success')
+                } else if (win == "CLOSING") {
+                    console.log('closing')
+                } else if (win == "NO_APP") {
+                    console.log('no suitable app to open the file (mainly will appear on android')
+                } else {
+                    console.log('error')
+                }
+            },
+        error => console.error("open failed", error),
+        BASE64,
+        {mimeType:'application/pdf'}
+    );
+  }
 
 
   return (
-    <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Chart Lib Sample</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent>
-        
-        <div id ="containerB"/>
-        <div id="container" />
-      </IonContent>
-    </IonPage>
+
+    <IonApp>
+      <IonPage>
+        <div style={{ height: '90vh' }}>
+          <div style={{ height: '300px', backgroundColor: 'red' }}>Header</div>
+          <IonButton onClick={handleClick}>Click Me </IonButton>
+          <IonButton onClick={() => window.open('http://localhost:8090/')}>window open </IonButton>
+          <IonButton onClick={launchUsingbase64}>Base 64  </IonButton>
+          <IonButton onClick={downloadOpenusingFile}>Download and Open </IonButton>
+        </div>
+      </IonPage>
+    </IonApp>
   );
 };
 
